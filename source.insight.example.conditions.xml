@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceInsightParseConditions
+	AppVer="4.00.0084"
+	AppVerMinReader="4.00.0019"
+	>
+	<ParseConditions>
+		<Defines>
+			<define id="a" value="1" />
+			<define id="b" value="0" />
+			<define id="c" value="" />
+		</Defines>
+	</ParseConditions>
+</SourceInsightParseConditions>
