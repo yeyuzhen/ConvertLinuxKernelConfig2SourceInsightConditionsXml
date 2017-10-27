@@ -57,7 +57,7 @@ def convert_kc2sic(kernel_configs):
 	for kconfig in kernel_configs:
 		config = ()
 		if len(kconfig) == 1:    # normal config, =y or =m
-			config = (kconfig[0], '')
+			config = (kconfig[0], '1')
 		elif kconfig[1][0] == '"':    # abnormal config, string type, ="cubic"
 		    config = (kconfig[0], kconfig[1][1:-1])
 		else:
