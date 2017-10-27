@@ -20,7 +20,7 @@ def get_args():
 	
 	args = arg_parser.parse_args()
 	
-	return (args.src_path, args.dest_path)
+	return (args.src_path, args.dest_path + '.conditions.xml')
 
 def parse_config_line(line):
 	if pattern_config.match(line):
@@ -51,6 +51,42 @@ def parse_kernel_config(config_path):
 		if config_file:
 			config_file.close()
 	return kernel_configs
+
+def convert_kc2sic(kernel_configs):
+	siconfigs = []
+	for kconfig in kernel_configs:
+		config = ()
+		if len(kconfig) == 1:    # normal config, =y or =m
+			config = (kconfig[0], '')
+		elif kconfig[1][0] == '"':    # abnormal config, string type, ="cubic"
+		    config = (kconfig[0], kconfig[1][1:-1])
+		else:
+			config = kconfig
+		
+		siconfigs.append(config)
+	return siconfigs
+
+def save_configs(si_configs, dest_path):
+	begin_text = '''<?xml version="1.0" encoding="utf-8"?>
+<SourceInsightParseConditions
+	AppVer="4.00.0084"
+	AppVerMinReader="4.00.0019"
+	>
+	<ParseConditions>
+		<Defines>
+'''
+	end_text = '''		</Defines>
+	</ParseConditions>
+</SourceInsightParseConditions>
+'''
+	config_format = '''			<define id="%s" value="%s" />
+'''
+	with open(dest_path, 'w') as config_file:
+		config_file.write(begin_text)
+		for config in si_configs:
+			config_file.write(config_format % config)
+		config_file.write(end_text)
+	return True
 	
 if __name__ == '__main__':
 	src_path, dest_path = get_args()
@@ -58,10 +94,13 @@ if __name__ == '__main__':
 	kernel_configs = parse_kernel_config(src_path)
 	if not kernel_configs:
 		print 'Error: kernel config file "%s" is empty, please check the content.' % (src_path)
+		exit()
 		
-	for config in kernel_configs:
-		print config
-	#print src_path
-	#print dest_path
+	si_configs = convert_kc2sic(kernel_configs)
 	
-	# TODO generate source insight conditional parsing xml config file.
+	save_status = save_configs(si_configs, dest_path)
+	if not save_status:
+		print 'Error: save source insight config file "%s" failed.' % (dest_path)
+		exit()
+	
+	print 'successful convert linux kernel config "%s" to source insight config "%s".' % (src_path, dest_path) 
