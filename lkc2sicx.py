@@ -6,10 +6,12 @@ import os
 import re
 
 RE_CONFIG = r'^CONFIG.*=.*'
-RE_NORMAL_CONFIG = r'(^CONFIG.*)=[ym]{1}.*'    # examples: CONFIG_PROC_KCORE=y  CONFIG_NF_NAT_IPV4=m
-RE_ABNORMAL_CONFIG = r'(^CONFIG.*)=(.*)'    # examples: CONFIG_DEFAULT_TCP_CONG="cubic"  CONFIG_SPLIT_PTLOCK_CPUS=4
+RE_CONFIG_NOT_SET = r'^# (CONFIG\w*) (is not set)$'    # example: # CONFIG_LOCALVERSION_AUTO is not set
+RE_NORMAL_CONFIG = r'(^CONFIG\w*)=([ym]{1}).*'    # examples: CONFIG_PROC_KCORE=y  CONFIG_NF_NAT_IPV4=m
+RE_ABNORMAL_CONFIG = r'(^CONFIG\w*)=(.*)'    # examples: CONFIG_DEFAULT_TCP_CONG="cubic"  CONFIG_SPLIT_PTLOCK_CPUS=4
 
 pattern_config = re.compile(RE_CONFIG)
+pattern_config_not_set = re.compile(RE_CONFIG_NOT_SET)
 pattern_normal_config = re.compile(RE_NORMAL_CONFIG)
 pattern_abnormal_config = re.compile(RE_ABNORMAL_CONFIG)
 
@@ -30,6 +32,11 @@ def parse_config_line(line):
 		else:
 			abnormal_match = pattern_abnormal_config.match(line)
 			return abnormal_match.groups()
+	else:
+		not_set_match = pattern_config_not_set.match(line)
+		if not_set_match:
+			return not_set_match.groups()
+		
 	return None
 
 def parse_kernel_config(config_path):
@@ -56,7 +63,9 @@ def convert_kc2sic(kernel_configs):
 	siconfigs = []
 	for kconfig in kernel_configs:
 		config = ()
-		if len(kconfig) == 1:    # normal config, =y or =m
+		if kconfig[1] == 'is not set':
+			config = (kconfig[0], '')
+		elif kconfig[1] == 'y' or kconfig[1] == 'm':
 			config = (kconfig[0], '1')
 		elif kconfig[1][0] == '"':    # abnormal config, string type, ="cubic"
 		    config = (kconfig[0], kconfig[1][1:-1])
