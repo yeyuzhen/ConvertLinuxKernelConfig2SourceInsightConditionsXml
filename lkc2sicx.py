@@ -6,9 +6,9 @@ import os
 import re
 
 RE_CONFIG = r'^CONFIG.*=.*'
-RE_CONFIG_NOT_SET = r'^# (CONFIG\w*) (is not set)$'    # example: # CONFIG_LOCALVERSION_AUTO is not set
-RE_NORMAL_CONFIG = r'(^CONFIG\w*)=([ym]{1}).*'    # examples: CONFIG_PROC_KCORE=y  CONFIG_NF_NAT_IPV4=m
-RE_ABNORMAL_CONFIG = r'(^CONFIG\w*)=(.*)'    # examples: CONFIG_DEFAULT_TCP_CONG="cubic"  CONFIG_SPLIT_PTLOCK_CPUS=4
+RE_CONFIG_NOT_SET = r'^# (CONFIG[\w-]*) (is not set)$'    # example: # CONFIG_LOCALVERSION_AUTO is not set
+RE_NORMAL_CONFIG = r'(^CONFIG[\w-]*)=([ym]{1}).*'    # examples: CONFIG_PROC_KCORE=y  CONFIG_NF_NAT_IPV4=m
+RE_ABNORMAL_CONFIG = r'(^CONFIG[\w-]*)=(.*)'    # examples: CONFIG_DEFAULT_TCP_CONG="cubic"  CONFIG_SPLIT_PTLOCK_CPUS=4
 
 pattern_config = re.compile(RE_CONFIG)
 pattern_config_not_set = re.compile(RE_CONFIG_NOT_SET)
